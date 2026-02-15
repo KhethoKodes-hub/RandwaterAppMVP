@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaLink · intelligent water infrastructure</title>
+  <!-- Bootstrap 5 + Icons + smooth fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <!-- Google Font for extra elegance -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: linear-gradient(145deg, #d4e9ff 0%, #e9f2fa 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px 0 40px 0;
+      position: relative;
+    }
+    /* subtle animated backdrop */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 20% 30%, rgba(0,180,255,0.1) 0%, transparent 30%),
+                  radial-gradient(circle at 80% 70%, rgba(0,230,200,0.08) 0%, transparent 35%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1280px;
+    }
+
+    /* ===== glassmorphism core ===== */
+    .glass-card, .glass-panel, .glass-nav, .glass-dashboard {
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 30, 50, 0.12), 0 8px 18px rgba(0, 40, 70, 0.1);
+    }
+
+    /* stronger glass for headers / interactive */
+    .glass-deep {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(14px) saturate(200%);
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: 0 25px 40px -12px rgba(0,80,120,0.25);
+    }
+
+    /* gradient text / accents */
+    .gradient-text {
+      background: linear-gradient(135deg, #006a94, #0099cc, #00b4b4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    /* header with live badge */
+    .live-header {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.5);
+      border-radius: 60px;
+      padding: 12px 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 15px 30px -10px rgba(0,50,80,0.15);
+    }
+
+    /* navigation glass */
+    .nav-glass {
+      background: rgba(10, 50, 80, 0.25);
+      backdrop-filter: blur(12px);
+      border-radius: 50px;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,0.4);
+      display: inline-flex;
+      margin-bottom: 30px;
+    }
+    .nav-glass .btn {
+      border-radius: 40px;
+      padding: 10px 32px;
+      font-weight: 600;
+      border: none;
+      transition: 0.2s;
+      color: #023e8a;
+    }
+    .nav-glass .btn.active {
+      background: white;
+      box-shadow: 0 10px 20px -8px #0077be;
+      color: #035c8f;
+    }
+    .nav-glass .btn:not(.active):hover {
+      background: rgba(255,255,255,0.3);
+      color: #012a4a;
+    }
+
+    /* cards */
+    .stat-card {
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(10px);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.7);
+      padding: 20px 18px;
+      transition: transform 0.15s ease;
+    }
+    .stat-card:hover {
+      transform: scale(1.02);
+      background: rgba(255,255,255,0.45);
+    }
+
+    /* status badges with modern tint */
+    .badge-status {
+      padding: 6px 18px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(4px);
+      border: 1px solid white;
+    }
+    .bg-pending { background: rgba(255, 165, 0, 0.7); color: #381f00; }
+    .bg-assigned { background: rgba(0, 100, 255, 0.65); color: white; }
+    .bg-resolved { background: rgba(0, 170, 100, 0.7); color: #003323; }
+
+    /* form elements inside glass */
+    .glass-input, .glass-select, .glass-textarea {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.9);
+      border-radius: 24px;
+      padding: 12px 18px;
+      backdrop-filter: blur(6px);
+      width: 100%;
+      transition: 0.15s;
+    }
+    .glass-input:focus, .glass-select:focus, .glass-textarea:focus {
+      background: rgba(255,255,255,0.8);
+      outline: none;
+      border-color: #00a6d1;
+      box-shadow: 0 0 0 4px rgba(0,170,230,0.2);
+    }
+
+    /* buttons with gradients */
+    .btn-gradient {
+      background: linear-gradient(115deg, #0093b2, #00b4b4, #2b7cff);
+      border: none;
+      color: white;
+      font-weight: 600;
+      border-radius: 60px;
+      padding: 12px 28px;
+      box-shadow: 0 10px 16px -7px #006080;
+      transition: 0.2s;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(115deg, #0083b0, #00a4c0, #1a6ce0);
+      transform: translateY(-3px);
+      box-shadow: 0 22px 26px -10px #005c8a;
+      color: white;
+    }
+    .btn-outline-glass {
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.7);
+      backdrop-filter: blur(8px);
+      border-radius: 60px;
+      padding: 10px 24px;
+      color: #02457a;
+      font-weight: 600;
+    }
+    .btn-outline-glass:hover {
+      background: rgba(255,255,255,0.35);
+      border-color: white;
+    }
+
+    /* AI result box */
+    .ai-bubble {
+      background: rgba(230, 250, 255, 0.45);
+      backdrop-filter: blur(6px);
+      border-radius: 28px;
+      padding: 14px 18px;
+      border-left: 5px solid #0088cc;
+    }
+
+    /* Image preview styling */
+    .image-preview-container {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      margin-top: 12px;
+      border: 2px dashed rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.2);
+    }
+    .image-preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+    .remove-image {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,68,68,0.8);
+      backdrop-filter: blur(4px);
+      border: none;
+      border-radius: 30px;
+      width: 32px;
+      height: 32px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .remove-image:hover {
+      background: rgba(220,20,20,0.9);
+      transform: scale(1.1);
+    }
+
+    /* Custom file input */
+    .file-input-area {
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .file-input-area:hover {
+      background: rgba(255,255,255,0.7);
+    }
+
+    /* live map placeholder (glass) */
+    .heatmap-placeholder {
+      background: linear-gradient(130deg, #b3e5ff, #a0d0f0);
+      border-radius: 36px;
+      padding: 30px 20px;
+      text-align: center;
+      border: 2px dashed rgba(255,255,255,0.8);
+    }
+
+    /* small text */
+    .text-soft {
+      color: #025373;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    /* divider */
+    hr {
+      background: rgba(255,255,255,0.5);
+      height: 2px;
+      opacity: 0.7;
+    }
+
+    /* floating animation for micro-interaction */
+    @keyframes floatGlow {
+      0% { box-shadow: 0 10px 30px -12px #0088b0; }
+      50% { box-shadow: 0 20px 40px -8px #00a0c0; }
+    }
+    .floating-glow {
+      animation: floatGlow 4s infinite ease-in-out;
+    }
+
+    /* image gallery in admin reports */
+    .report-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 2px solid white;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- === HEADER with live product feel === -->
+  <div class="live-header d-flex justify-content-between align-items-center px-4 py-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <i class="bi bi-droplet fs-1" style="color: #0077b6;"></i>
+      <div>
+        <h1 class="fw-bold mb-0 gradient-text" style="font-size: 2.1rem;">AquaLink <span style="font-weight: 300;">intelligent</span></h1>
+        <div class="d-flex align-items-center gap-2 mt-1">
+          <span class="badge-status" style="background: #00a86b; color: white;"><i class="bi bi-check-circle-fill me-1"></i> LIVE · 4 active</span>
+          <span class="text-soft"><i class="bi bi-wifi"></i> sync: realtime</span>
+        </div>
+      </div>
+    </div>
+    <div class="d-none d-md-flex gap-3">
+      <span class="badge-status" style="background: rgba(255,255,255,0.5);"><i class="bi bi-people-fill me-1"></i> 12 field techs</span>
+      <span class="badge-status" style="background: rgba(255,255,255,0.5);"><i class="bi bi-exclamation-triangle-fill me-1" style="color:#d94f00;"></i> 3 high priority</span>
+    </div>
+  </div>
+
+  <!-- === NAVIGATION glass toggle (citizen/admin) === -->
+  <div class="d-flex justify-content-center">
+    <div class="nav-glass" role="group">
+      <button class="btn" id="btnCitizen" onclick="showCitizen()"><i class="bi bi-house me-2"></i>Citizen interface</button>
+      <button class="btn active" id="btnAdmin" onclick="showAdmin()"><i class="bi bi-bar-chart-fill me-2"></i>Water Wise Dashboard</button>
+    </div>
+  </div>
+
+  <!-- ==================== CITIZEN VIEW (glass magic) ==================== -->
+  <div id="citizenView" class="hidden mt-4" style="display: none;">
+    <div class="row g-4">
+      <!-- left column: report + DIY -->
+      <div class="col-lg-7">
+        <!-- report card glass -->
+        <div class="glass-card p-4 mb-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-megaphone fs-3" style="color:#006994;"></i>
+            <h3 class="fw-bold mb-0 gradient-text">Report water issue</h3>
+            <span class="ms-auto badge-status bg-pending">offline‑ready</span>
+          </div>
+          <div class="mb-3">
+            <label class="fw-semibold mb-1 text-soft">Issue category</label>
+            <select class="glass-select" id="issueType">
+              <option>🚰 Tap Leak</option>
+              <option>💥 Pipe Burst</option>
+              <option>🏗️ Infrastructure Damage</option>
+              <option>🚫 No Water</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="fw-semibold mb-1 text-soft">Description</label>
+            <textarea id="description" class="glass-textarea" rows="3" placeholder="Describe exact location, since when? ..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="fw-semibold mb-1 text-soft">Upload photo evidence</label>
+            <div class="glass-input file-input-area d-flex align-items-center justify-content-between" onclick="document.getElementById('imageUpload').click()">
+              <span><i class="bi bi-camera me-2"></i> <span id="uploadFileName">tap to capture or upload</span></span>
+              <i class="bi bi-cloud-upload fs-5"></i>
+            </div>
+            <input type="file" id="imageUpload" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(this)">
+          </div>
+          
+          <!-- Image preview area -->
+          <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
+            <img id="imagePreview" class="image-preview" src="#" alt="Preview">
+            <button class="remove-image" onclick="removeImage()"><i class="bi bi-x"></i></button>
+          </div>
+          
+          <div class="d-flex gap-3 flex-wrap mt-3">
+            <button class="btn-gradient" onclick="analyzeAI()"><i class="bi bi-robot me-2"></i>AI pre‑analysis</button>
+            <button class="btn-outline-glass" onclick="submitReport()"><i class="bi bi-send me-2"></i>Submit report</button>
+          </div>
+          
+          <!-- Compression simulation indicator -->
+          <div id="compressionStatus" class="small text-soft mt-2" style="display: none;">
+            <i class="bi bi-arrow-repeat me-1"></i> Compressing image...
+          </div>
+          
+          <!-- AI result glass bubble -->
+          <div id="aiResult" class="ai-bubble mt-4 small fw-medium">
+            <i class="bi bi-cpu me-1"></i> AI ready: click "AI pre‑analysis"
+          </div>
+        </div>
+
+        <!-- DIY fix card with gradient -->
+        <div class="glass-card p-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-tools fs-2"></i>
+            <h4 class="fw-bold mb-0">Fix-it-yourself (tap leak)</h4>
+          </div>
+          <button class="btn btn-outline-glass mt-3" onclick="showDIY()"><i class="bi bi-wrench me-1"></i>Show step‑by‑step</button>
+          <div id="diyContent" class="mt-3 p-3" style="background: rgba(255,255,255,0.3); border-radius: 24px; font-size: 0.95rem;">
+            <i class="bi bi-info-circle"></i> Click to load instructions
+          </div>
+        </div>
+      </div>
+
+      <!-- right column: my reports + live stats -->
+      <div class="col-lg-5">
+        <div class="glass-deep p-4" style="border-radius: 36px;">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-clock-history fs-2"></i>
+            <h4 class="fw-bold mb-0">My reports</h4>
+            <span class="badge-status ms-auto" id="reportCount">0 active</span>
+          </div>
+          <div id="myReports" class="d-flex flex-column gap-3" style="max-height: 380px; overflow-y: auto; padding-right: 4px;">
+            <!-- dynamic injected cards -->
+          </div>
+          <hr class="my-3">
+          <div class="d-flex justify-content-between text-soft">
+            <span><i class="bi bi-shield-check"></i> offline sync</span>
+            <span><i class="bi bi-bell"></i> notifications on</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN / WATER WISE DASHBOARD (glass & gradients) ==================== -->
+  <div id="adminView" class="mt-4">
+    <!-- stats row -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <i class="bi bi-exclamation-triangle fs-1" style="color:#b66200;"></i>
+          <div>
+            <span class="text-soft text-uppercase small">pending</span>
+            <h3 class="fw-bold mb-0" id="statPending">3</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <i class="bi bi-truck fs-1" style="color:#004c99;"></i>
+          <div>
+            <span class="text-soft small">assigned</span>
+            <h3 class="fw-bold mb-0" id="statAssigned">2</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <i class="bi bi-check2-circle fs-1" style="color:#1e7e34;"></i>
+          <div>
+            <span class="text-soft small">resolved</span>
+            <h3 class="fw-bold mb-0" id="statResolved">4</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+          <i class="bi bi-droplet-half fs-1" style="color:#007ea7;"></i>
+          <div>
+            <span class="text-soft small">est. loss (m³)</span>
+            <h3 class="fw-bold mb-0">12.4</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- main admin panel: reports + heatmap -->
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="glass-panel p-4">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-list-check fs-2 me-2"></i>
+            <h3 class="fw-bold gradient-text mb-0">Live incoming tickets</h3>
+            <span class="badge-status ms-2 bg-pending">SLA active</span>
+          </div>
+          <div id="adminReports" class="d-flex flex-column gap-3" style="max-height: 470px; overflow-y: auto;">
+            <!-- reports injected from js -->
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <!-- heatmap + plumber network preview (glass) -->
+        <div class="glass-panel p-4 mb-4">
+          <h5><i class="bi bi-heat-map me-2"></i>Infrastructure heatmap (live)</h5>
+          <div class="heatmap-placeholder my-3">
+            <i class="bi bi-map fs-1" style="opacity:0.6;"></i>
+            <p class="mb-0 text-soft">[ live map rendering · 9 hotspots ]</p>
+            <div class="d-flex justify-content-center gap-2 mt-2">
+              <span class="badge-status" style="background: #ffaa3370;">🔴 high 2</span>
+              <span class="badge-status" style="background: #ffe082;">🟡 medium 5</span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mt-2">
+            <span><i class="bi bi-geo-alt"></i> 6km² coverage</span>
+            <button class="btn-outline-glass btn-sm">export</button>
+          </div>
+        </div>
+        <!-- field team online -->
+        <div class="glass-panel p-4">
+          <div class="d-flex gap-3 align-items-center">
+            <i class="bi bi-person-workspace fs-2"></i>
+            <span class="fw-bold">field team: <span class="gradient-text">4 active</span></span>
+          </div>
+          <div class="mt-2 small">
+            <i class="bi bi-bicycle"></i> J. Nkosi · assigned to burst<br>
+            <i class="bi bi-truck"></i> L. van Wyk · en route<br>
+            <i class="bi bi-tools"></i> M. Dlamini · on site
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLA & export row -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="glass-card p-3 d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-clock"></i> SLA: 93% within 45min</span>
+          <span><i class="bi bi-download"></i> generate report / export</span>
+          <button class="btn-gradient btn-sm">download CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- tiny footer note -->
+  <div class="text-center mt-5 text-soft small">
+    <i class="bi bi-database"></i> offline first · AI assisted · v2.3.1 · prototype live data
+  </div>
+</div>
+
+<!-- javascript: full interactivity + glass updates -->
+<script>
+  // initial dummy reports for live feel
+  let reports = JSON.parse(localStorage.getItem("aquaReports")) || [
+    { 
+      id: 2401, 
+      type: "💥 Pipe Burst", 
+      description: "Main road & 5th, geyser fountain", 
+      aiAnalysis: "AI: high severity – burst 8\" pipe", 
+      status: "Pending", 
+      adminResponse: "dispatch crew #2",
+      image: null
+    },
+    { 
+      id: 2402, 
+      type: "🚰 Tap Leak", 
+      description: "Parkview 12, outdoor tap", 
+      aiAnalysis: "AI: low severity, likely washer", 
+      status: "Assigned", 
+      adminResponse: "plumber assigned: S. Khumalo",
+      image: null
+    },
+    { 
+      id: 2403, 
+      type: "🏗️ Infrastructure Damage", 
+      description: "Fire hydrant knocked over, corner Alex", 
+      aiAnalysis: "AI: infrastructure damage, moderate", 
+      status: "Resolved", 
+      adminResponse: "replaced hydrant 08:45",
+      image: null
+    },
+    { 
+      id: 2404, 
+      type: "🚫 No Water", 
+      description: "Zandspruit informal settlement", 
+      aiAnalysis: "AI: possible supply interruption", 
+      status: "Assigned", 
+      adminResponse: "tankering water",
+      image: null
+    },
+    { 
+      id: 2405, 
+      type: "🚰 Tap Leak", 
+      description: "school central, leaking valve", 
+      aiAnalysis: "AI: minor leak, advise washer", 
+      status: "Pending", 
+      adminResponse: "",
+      image: null
+    },
+  ];
+
+  // Current image data for new report
+  let currentImageData = null;
+
+  // helper
+  function saveReports() {
+    localStorage.setItem("aquaReports", JSON.stringify(reports));
+    updateStatsAndViews();
+  }
+
+  function updateStatsAndViews() {
+    // update counts
+    let pending = reports.filter(r => r.status === "Pending").length;
+    let assigned = reports.filter(r => r.status === "Assigned").length;
+    let resolved = reports.filter(r => r.status === "Resolved").length;
+    document.getElementById("statPending") && (document.getElementById("statPending").innerText = pending);
+    document.getElementById("statAssigned") && (document.getElementById("statAssigned").innerText = assigned);
+    document.getElementById("statResolved") && (document.getElementById("statResolved").innerText = resolved);
+
+    if (!document.getElementById("citizenView").classList.contains('hidden-switch')) {
+      if (document.getElementById("citizenView").style.display !== 'none') renderCitizenReports();
+      else renderAdminReports();
+    } else {
+      renderAdminReports();
+      renderCitizenReports();
+    }
+  }
+
+  // Image handling functions
+  window.handleImageUpload = function(input) {
+    const file = input.files[0];
+    if (file) {
+      // Show compression simulation
+      document.getElementById("compressionStatus").style.display = "block";
+      document.getElementById("uploadFileName").innerText = file.name;
+      
+      // Simulate compression delay
+      setTimeout(() => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentImageData = e.target.result;
+          document.getElementById("imagePreview").src = e.target.result;
+          document.getElementById("imagePreviewContainer").style.display = "block";
+          document.getElementById("compressionStatus").style.display = "none";
+          
+          // Show compression success
+          const aiBox = document.getElementById("aiResult");
+          aiBox.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Image captured & compressed (80% smaller)`;
+        }
+        reader.readAsDataURL(file);
+      }, 800); // Simulate compression time
+    }
+  }
+
+  window.removeImage = function() {
+    currentImageData = null;
+    document.getElementById("imagePreviewContainer").style.display = "none";
+    document.getElementById("imageUpload").value = "";
+    document.getElementById("uploadFileName").innerText = "tap to capture or upload";
+    document.getElementById("aiResult").innerHTML = `<i class="bi bi-cpu me-1"></i> AI ready: click "AI pre‑analysis"`;
+  }
+
+  // citizen render with images
+  function renderCitizenReports() {
+    const cont = document.getElementById("myReports");
+    if (!cont) return;
+    const citizenReports = reports.slice(-3); // last 3 for citizen simplicity
+    cont.innerHTML = "";
+    if (citizenReports.length === 0) cont.innerHTML = '<div class="text-soft">no reports yet</div>';
+    citizenReports.forEach(r => {
+      const statusClass = r.status === "Pending" ? "bg-pending" : (r.status === "Assigned" ? "bg-assigned" : "bg-resolved");
+      cont.innerHTML += `
+        <div class="glass-card p-3" style="border-radius: 24px;">
+          <div class="d-flex justify-content-between align-items-center">
+            <strong>${r.type}</strong>
+            <span class="badge-status ${statusClass}">${r.status}</span>
+          </div>
+          ${r.image ? `<img src="${r.image}" class="report-thumb mt-2" style="width:100%; height:120px; object-fit:cover; border-radius:16px;">` : ''}
+          <p class="small mb-1 mt-2">${r.description.substring(0,40)}…</p>
+          <span class="small text-soft"><i class="bi bi-chat"></i> ${r.adminResponse || 'no update'}</span>
+        </div>
+      `;
+    });
+    document.getElementById("reportCount").innerText = reports.length + ' total';
+  }
+
+  // admin render with images
+  function renderAdminReports() {
+    const container = document.getElementById("adminReports");
+    if (!container) return;
+    container.innerHTML = "";
+    reports.forEach((r, idx) => {
+      const statusClass = r.status === "Pending" ? "bg-pending" : (r.status === "Assigned" ? "bg-assigned" : "bg-resolved");
+      container.innerHTML += `
+      <div class="glass-card p-3" data-index="${idx}">
+        <div class="d-flex justify-content-between align-items-start">
+          <span><strong>${r.type}</strong> <span class="badge-status ${statusClass} ms-2">${r.status}</span></span>
+          <small class="text-soft">#${r.id}</small>
+        </div>
+        ${r.image ? `<img src="${r.image}" class="report-thumb mb-2" style="width:80px; height:80px; object-fit:cover;">` : ''}
+        <p class="small mb-2">${r.description}</p>
+        <div class="ai-bubble small p-2 mb-2">🤖 ${r.aiAnalysis}</div>
+        <div class="row g-2 mt-1">
+          <div class="col-md-5">
+            <select class="glass-select" style="padding: 6px 12px;" onchange="updateStatus(${idx}, this.value)">
+              <option value="Pending" ${r.status==="Pending"?"selected":""}>⏳ Pending</option>
+              <option value="Assigned" ${r.status==="Assigned"?"selected":""}>🛠️ Assigned</option>
+              <option value="Resolved" ${r.status==="Resolved"?"selected":""}>✅ Resolved</option>
+            </select>
+          </div>
+          <div class="col-md-7">
+            <input class="glass-input" style="padding: 6px 12px;" type="text" placeholder="admin response" value="${r.adminResponse.replace(/"/g, '&quot;')}" onchange="updateResponse(${idx}, this.value)">
+          </div>
+        </div>
+      </div>
+      `;
+    });
+  }
+
+  // handlers
+  function updateStatus(index, value) {
+    reports[index].status = value;
+    saveReports();
+  }
+  function updateResponse(index, value) {
+    reports[index].adminResponse = value;
+    saveReports();
+  }
+  window.updateStatus = updateStatus;
+  window.updateResponse = updateResponse;
+
+  // submit new report (citizen)
+  window.submitReport = function() {
+    const type = document.getElementById("issueType").value;
+    const desc = document.getElementById("description").value;
+    if (!desc.trim()) { alert("description required"); return; }
+    
+    const ai = document.getElementById("aiResult").innerText.includes("AI") ? 
+                document.getElementById("aiResult").innerText : 
+                "AI: quick scan done";
+    
+    const newReport = {
+      id: Math.floor(Math.random()*9000+1000),
+      type: type,
+      description: desc,
+      aiAnalysis: ai,
+      status: "Pending",
+      adminResponse: "",
+      image: currentImageData // Store the captured image
+    };
+    
+    reports.push(newReport);
+    saveReports();
+    
+    // Clear form
+    document.getElementById("description").value = "";
+    removeImage();
+    document.getElementById("aiResult").innerHTML = '<i class="bi bi-cpu me-1"></i> AI ready: click "AI pre‑analysis"';
+    
+    alert("✔ Report submitted with " + (currentImageData ? "photo evidence" : "text only"));
+    
+    if (document.getElementById("citizenView").style.display !== 'none') renderCitizenReports();
+    else renderAdminReports();
+  }
+
+  window.analyzeAI = function() {
+    const type = document.getElementById("issueType").value;
+    let result = "";
+    
+    // Enhanced AI analysis with image consideration
+    if (currentImageData) {
+      if (type.includes("Tap")) result = "🧠 AI: analyzing image... washer failure probability 89% · severity low · DIY possible";
+      else if (type.includes("Burst")) result = "🧠 AI: analyzing image... critical burst detected, water loss ~210L/min · immediate dispatch";
+      else if (type.includes("Infrastructure")) result = "🧠 AI: analyzing image... structure damage, risk score 6.2 · inspect within 2h";
+      else result = "🧠 AI: analyzing image... supply interruption detected, check pressure zone 4";
+    } else {
+      if (type.includes("Tap")) result = "🧠 AI: washer failure probability 76% (image recommended for better accuracy)";
+      else if (type.includes("Burst")) result = "🧠 AI: suspected burst (upload image for severity analysis)";
+      else if (type.includes("Infrastructure")) result = "🧠 AI: possible infrastructure damage (photo needed for verification)";
+      else result = "🧠 AI: supply interruption suspected";
+    }
+    
+    document.getElementById("aiResult").innerHTML = `<i class="bi bi-robot"></i> ${result}`;
+  }
+
+  window.showDIY = function() {
+    document.getElementById("diyContent").innerHTML = `
+      <i class="bi bi-check-circle-fill text-success me-1"></i> 1. turn off stopcock<br>
+      <i class="bi bi-check-circle-fill text-success me-1"></i> 2. remove tap handle<br>
+      <i class="bi bi-check-circle-fill text-success me-1"></i> 3. replace rubber washer<br>
+      <i class="bi bi-check-circle-fill text-success me-1"></i> 4. reassemble & test
+    `;
+  }
+
+  // view toggle (citizen/admin) with active button style
+  window.showCitizen = function() {
+    document.getElementById("citizenView").style.display = "block";
+    document.getElementById("adminView").style.display = "none";
+    document.getElementById("btnCitizen").classList.add("active");
+    document.getElementById("btnAdmin").classList.remove("active");
+    renderCitizenReports();
+  }
+  
+  window.showAdmin = function() {
+    document.getElementById("citizenView").style.display = "none";
+    document.getElementById("adminView").style.display = "block";
+    document.getElementById("btnAdmin").classList.add("active");
+    document.getElementById("btnCitizen").classList.remove("active");
+    renderAdminReports();
+  }
+
+  // initialise: start with admin (dashboard first for management wow)
+  window.onload = function() {
+    // ensure admin active
+    document.getElementById("citizenView").style.display = "none";
+    document.getElementById("adminView").style.display = "block";
+    document.getElementById("btnAdmin").classList.add("active");
+    document.getElementById("btnCitizen").classList.remove("active");
+    saveReports(); // refresh stats
+    renderAdminReports();
+    renderCitizenReports();
+  }
+</script>
+
+<!-- bootstrap js (optional for some toggles) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
